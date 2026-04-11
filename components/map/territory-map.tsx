@@ -10,7 +10,6 @@ import {
   Popup,
   useMap,
   useMapEvents,
-  ZoomControl,
 } from 'react-leaflet'
 import type { LatLngExpression, LeafletMouseEvent } from 'leaflet'
 import 'leaflet/dist/leaflet.css'
@@ -19,7 +18,18 @@ import type { Territory } from '@/lib/territory/types'
 import { formatArea } from '@/lib/territory/geo'
 import { TERRITORY_COLORS } from '@/lib/territory/types'
 import { Button } from '@/components/ui/button'
-import { Crosshair } from 'lucide-react'
+import { Crosshair, MapPin, Shield, Swords } from 'lucide-react'
+
+// Brand colors from VentureGeo manual
+const BRAND = {
+  lime: '#CCFF00',
+  electric: '#00D2FF',
+  navy: '#19305A',
+  navyDark: '#0d1a2d',
+  border: '#2d4a70',
+  dispute: '#FF4D4D',
+  success: '#22c55e',
+}
 
 // Map event handler component
 function MapEventHandler() {
@@ -81,15 +91,18 @@ function LocationControl() {
   }
 
   return (
-    <div className="leaflet-bottom leaflet-right" style={{ marginBottom: '80px' }}>
+    <div className="leaflet-bottom leaflet-right" style={{ marginBottom: '100px', marginRight: '10px' }}>
       <div className="leaflet-control">
         <Button
-          variant="secondary"
           size="icon"
-          className="h-10 w-10 bg-card hover:bg-secondary border border-border"
+          className="h-11 w-11 shadow-lg border"
+          style={{
+            background: BRAND.navy,
+            borderColor: BRAND.border,
+          }}
           onClick={handleLocate}
         >
-          <Crosshair className="h-4 w-4" />
+          <Crosshair className="h-5 w-5" style={{ color: BRAND.lime }} />
         </Button>
       </div>
     </div>
@@ -109,10 +122,10 @@ function TerritoryPolygon({
   onClick: () => void
 }) {
   const getColor = () => {
-    if (territory.status === 'disputed') return TERRITORY_COLORS.disputed
-    if (territory.status === 'protected') return TERRITORY_COLORS.protected
-    if (isOwn) return TERRITORY_COLORS.own
-    return territory.userColor || TERRITORY_COLORS.other
+    if (territory.status === 'disputed') return BRAND.dispute
+    if (territory.status === 'protected') return BRAND.success
+    if (isOwn) return BRAND.lime
+    return territory.userColor || BRAND.electric
   }
 
   const coordinates = territory.polygon.geometry.coordinates[0]
@@ -121,64 +134,103 @@ function TerritoryPolygon({
   )
 
   const color = getColor()
-  const fillOpacity = isSelected ? 0.5 : 0.3
+  const fillOpacity = isSelected ? 0.5 : 0.35
   const weight = isSelected ? 3 : 2
+
+  const StatusIcon = territory.status === 'disputed' 
+    ? Swords 
+    : territory.status === 'protected' 
+      ? Shield 
+      : MapPin
+
+  const statusColor = territory.status === 'disputed'
+    ? BRAND.dispute
+    : territory.status === 'protected'
+      ? BRAND.success
+      : BRAND.lime
+
+  const statusLabel = territory.status === 'active'
+    ? 'Ativo'
+    : territory.status === 'disputed'
+      ? 'Em Disputa'
+      : territory.status === 'protected'
+        ? 'Protegido'
+        : territory.status
 
   return (
     <Polygon
       positions={positions}
       pathOptions={{
-        color: isSelected ? TERRITORY_COLORS.selected : color,
+        color: isSelected ? '#FFFFFF' : color,
         fillColor: color,
         fillOpacity,
         weight,
+        className: territory.status === 'disputed' ? 'territory-dispute' : 'territory-pulse',
       }}
       eventHandlers={{
         click: onClick,
       }}
     >
       <Popup>
-        <div className="min-w-48 p-1">
-          <div className="flex items-center gap-2 mb-2">
+        <div className="min-w-52 -m-3 -mt-4">
+          {/* Header */}
+          <div 
+            className="px-4 py-3 flex items-center gap-3"
+            style={{ 
+              borderBottom: `1px solid ${BRAND.border}`,
+            }}
+          >
             <div
-              className="w-3 h-3 rounded-full"
-              style={{ backgroundColor: territory.userColor || color }}
+              className="w-4 h-10 rounded-full shrink-0"
+              style={{ 
+                backgroundColor: territory.userColor || color,
+                boxShadow: `0 0 8px ${territory.userColor || color}40`
+              }}
             />
-            <span className="font-semibold text-foreground">
-              {territory.userName || 'Usuario'}
-            </span>
+            <div>
+              <div className="font-semibold text-foreground">
+                {isOwn ? 'Seu Territorio' : territory.userName || 'Usuario'}
+              </div>
+              <div className="text-xs text-muted-foreground capitalize">
+                Nivel {territory.dominanceLevel}
+              </div>
+            </div>
           </div>
-          <div className="space-y-1 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Area:</span>
-              <span className="font-mono font-medium">
+          
+          {/* Stats */}
+          <div className="px-4 py-3 space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-muted-foreground">Area</span>
+              <span 
+                className="font-mono font-bold text-lg"
+                style={{ color: isOwn ? BRAND.lime : BRAND.electric }}
+              >
                 {formatArea(territory.areaM2)}
               </span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Status:</span>
-              <span
-                className={`font-medium ${
-                  territory.status === 'disputed'
-                    ? 'text-destructive'
-                    : territory.status === 'protected'
-                      ? 'text-green-500'
-                      : 'text-primary'
-                }`}
+            
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-muted-foreground">Status</span>
+              <div 
+                className="flex items-center gap-1.5 px-2 py-1 rounded-md"
+                style={{ 
+                  background: `${statusColor}15`,
+                }}
               >
-                {territory.status === 'active'
-                  ? 'Ativo'
-                  : territory.status === 'disputed'
-                    ? 'Disputa'
-                    : territory.status === 'protected'
-                      ? 'Protegido'
-                      : territory.status}
-              </span>
+                <StatusIcon className="h-3.5 w-3.5" style={{ color: statusColor }} />
+                <span 
+                  className="text-sm font-medium"
+                  style={{ color: statusColor }}
+                >
+                  {statusLabel}
+                </span>
+              </div>
             </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Nivel:</span>
-              <span className="font-medium capitalize">
-                {territory.dominanceLevel}
+            
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-muted-foreground">Conquistas</span>
+              <span className="font-mono text-foreground">
+                {territory.conquestCount}x
               </span>
             </div>
           </div>
@@ -204,7 +256,7 @@ function DrawingLayer() {
       <Polyline
         positions={positions}
         pathOptions={{
-          color: TERRITORY_COLORS.own,
+          color: BRAND.lime,
           weight: 3,
           dashArray: '10, 10',
         }}
@@ -215,10 +267,10 @@ function DrawingLayer() {
         <CircleMarker
           key={index}
           center={[point[1], point[0]]}
-          radius={index === 0 ? 8 : 5}
+          radius={index === 0 ? 10 : 6}
           pathOptions={{
-            color: TERRITORY_COLORS.own,
-            fillColor: index === 0 ? TERRITORY_COLORS.own : '#0A1628',
+            color: BRAND.lime,
+            fillColor: index === 0 ? BRAND.lime : BRAND.navyDark,
             fillOpacity: 1,
             weight: 2,
           }}
@@ -233,10 +285,23 @@ function DrawingLayer() {
             [drawingPoints[0][1], drawingPoints[0][0]],
           ]}
           pathOptions={{
-            color: TERRITORY_COLORS.own,
+            color: BRAND.lime,
             weight: 2,
             dashArray: '5, 10',
             opacity: 0.5,
+          }}
+        />
+      )}
+
+      {/* Preview fill when 3+ points */}
+      {drawingPoints.length >= 3 && (
+        <Polygon
+          positions={positions}
+          pathOptions={{
+            color: BRAND.lime,
+            fillColor: BRAND.lime,
+            fillOpacity: 0.15,
+            weight: 0,
           }}
         />
       )}

@@ -8,6 +8,7 @@ import {
   Check,
   Undo2,
   Eye,
+  MapPin,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -42,21 +43,32 @@ export function MapControlsOverlay() {
   return (
     <>
       {/* Bottom center - Drawing controls */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[1000]">
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[1000]">
         {!isDrawing ? (
           <Button
             onClick={handleStartDrawing}
-            className="h-14 px-8 bg-primary text-primary-foreground hover:bg-primary/90 font-semibold text-base shadow-lg"
+            className="h-14 px-8 font-semibold text-base shadow-lg glow-lime"
+            style={{
+              background: '#CCFF00',
+              color: '#19305A',
+            }}
           >
             <Pencil className="h-5 w-5 mr-2" />
             Desenhar Territorio
           </Button>
         ) : (
-          <div className="flex items-center gap-2 p-2 bg-card/95 backdrop-blur-sm rounded-xl border border-border shadow-lg">
+          <div 
+            className="flex items-center gap-2 p-2 backdrop-blur-sm rounded-2xl shadow-lg border"
+            style={{
+              background: 'rgba(25, 48, 90, 0.95)',
+              borderColor: '#2d4a70'
+            }}
+          >
             <Button
               variant="ghost"
               size="icon"
-              className="h-12 w-12 text-destructive hover:text-destructive hover:bg-destructive/10"
+              className="h-12 w-12 rounded-xl hover:bg-[#FF4D4D]/10"
+              style={{ color: '#FF4D4D' }}
               onClick={handleCancelDrawing}
             >
               <X className="h-5 w-5" />
@@ -65,39 +77,49 @@ export function MapControlsOverlay() {
             <Button
               variant="ghost"
               size="icon"
-              className="h-12 w-12"
+              className="h-12 w-12 rounded-xl hover:bg-[#243a5e]"
               onClick={removeLastDrawingPoint}
               disabled={!canUndo}
             >
               <Undo2 className="h-5 w-5" />
             </Button>
 
-            <div className="h-8 w-px bg-border" />
+            <div 
+              className="h-8 w-px"
+              style={{ background: '#2d4a70' }}
+            />
 
-            <div className="px-4 text-center">
-              <div className="text-sm font-medium text-foreground">
-                {drawingPoints.length} pontos
+            <div className="px-4 text-center min-w-[100px]">
+              <div 
+                className="text-lg font-mono font-bold"
+                style={{ color: '#CCFF00' }}
+              >
+                {drawingPoints.length}
               </div>
-              <div className="text-xs text-muted-foreground">
-                {canFinish ? 'Pronto para salvar' : 'Min. 3 pontos'}
+              <div className="text-[10px] text-muted-foreground uppercase tracking-wide">
+                {canFinish ? 'Pronto' : 'Min. 3 pts'}
               </div>
             </div>
 
-            <div className="h-8 w-px bg-border" />
+            <div 
+              className="h-8 w-px"
+              style={{ background: '#2d4a70' }}
+            />
 
             <Button
               variant="ghost"
               size="icon"
               className={cn(
-                'h-12 w-12',
+                'h-12 w-12 rounded-xl',
                 canFinish
-                  ? 'text-primary hover:text-primary hover:bg-primary/10'
-                  : 'text-muted-foreground'
+                  ? 'hover:bg-[#CCFF00]/10'
+                  : 'opacity-50 cursor-not-allowed'
               )}
+              style={{ color: canFinish ? '#CCFF00' : '#8ba3c7' }}
               onClick={handleFinishDrawing}
               disabled={!canFinish}
             >
-              <Check className="h-5 w-5" />
+              <Check className="h-6 w-6" />
             </Button>
           </div>
         )}
@@ -106,9 +128,36 @@ export function MapControlsOverlay() {
       {/* Drawing mode indicator */}
       {isDrawing && (
         <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000]">
-          <div className="flex items-center gap-2 px-4 py-2 bg-primary/90 text-primary-foreground rounded-full text-sm font-medium shadow-lg">
-            <Eye className="h-4 w-4" />
+          <div 
+            className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium shadow-lg"
+            style={{
+              background: 'rgba(204, 255, 0, 0.95)',
+              color: '#19305A'
+            }}
+          >
+            <MapPin className="h-4 w-4" />
             Clique no mapa para adicionar pontos
+          </div>
+        </div>
+      )}
+
+      {/* Points indicator while drawing */}
+      {isDrawing && drawingPoints.length > 0 && (
+        <div className="absolute top-16 left-1/2 -translate-x-1/2 z-[1000]">
+          <div 
+            className="flex items-center gap-2 px-4 py-2 rounded-full text-xs shadow-lg"
+            style={{
+              background: 'rgba(25, 48, 90, 0.9)',
+              border: '1px solid #2d4a70'
+            }}
+          >
+            <Eye className="h-3 w-3 text-[#00D2FF]" />
+            <span className="text-muted-foreground">
+              {drawingPoints.length < 3 
+                ? `Adicione mais ${3 - drawingPoints.length} ponto${3 - drawingPoints.length > 1 ? 's' : ''}`
+                : 'Clique no botao verde para finalizar'
+              }
+            </span>
           </div>
         </div>
       )}

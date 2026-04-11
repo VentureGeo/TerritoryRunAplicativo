@@ -190,22 +190,27 @@ export const DEFAULT_TERRITORY_CONFIG: TerritoryConfig = {
 
 /**
  * Cores dos territorios por nivel de dominio
+ * VentureGeo Brand Colors
  */
 export const DOMINANCE_COLORS: Record<DominanceLevel, string> = {
-  bronze: '#CD7F32',
-  silver: '#C0C0C0',
-  gold: '#FFD700',
-  platinum: '#E5E4E2',
-  diamond: '#B9F2FF',
+  bronze: '#D97706',
+  silver: '#9CA3AF',
+  gold: '#CCFF00', // Performance Lime
+  platinum: '#E5E7EB',
+  diamond: '#00D2FF', // Electric Blue
 }
 
 /**
  * Cores padrao dos territorios
+ * VentureGeo Brand Manual (March 2026)
+ * - Performance Lime: #CCFF00
+ * - Electric Blue: #00D2FF
+ * - Deep Navy: #19305A
  */
 export const TERRITORY_COLORS = {
-  own: '#B8FF00', // Performance Lime
-  other: '#00BFFF', // Electric Blue
-  disputed: '#FF6B6B', // Coral
-  protected: '#4ADE80', // Green
+  own: '#CCFF00', // Performance Lime (official)
+  other: '#00D2FF', // Electric Blue (official)
+  disputed: '#FF4D4D', // Red for disputes
+  protected: '#22c55e', // Green
   selected: '#FFFFFF', // White border
 }
