@@ -30,12 +30,19 @@ export default function HomePage() {
               </div>
               <span className="text-xl font-bold text-foreground">TerritoryRun</span>
             </div>
-            <Link href="/mapa">
-              <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
-                Abrir Mapa
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link href="/login">
+                <Button variant="outline" className="border-border shadow-xs">
+                  Entrar
+                </Button>
+              </Link>
+              <Link href="/mapa">
+                <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
+                  Abrir Mapa
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
           </nav>
 
           {/* Hero content */}

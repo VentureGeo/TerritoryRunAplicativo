@@ -1,11 +1,15 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import { useTerritoryStore } from '@/lib/store/territory-store'
+import { useAuthStore } from '@/lib/store/auth-store'
 import { Button } from '@/components/ui/button'
 import { formatArea } from '@/lib/territory/geo'
-import { Map, User, Settings, Trophy } from 'lucide-react'
+import { LogOut, Map, Settings, Trophy, User } from 'lucide-react'
 
 export function Header() {
+  const router = useRouter()
+  const logout = useAuthStore((s) => s.logout)
   const { territories, currentUserId, getTotalAreaForUser, users } =
     useTerritoryStore()
 
@@ -59,6 +63,19 @@ export function Header() {
 
       {/* User menu */}
       <div className="flex items-center gap-2">
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="h-9 w-9"
+          onClick={() => {
+            logout()
+            router.replace('/')
+          }}
+          aria-label="Sair"
+        >
+          <LogOut className="h-4 w-4" />
+        </Button>
         <Button variant="ghost" size="icon" className="h-9 w-9">
           <Settings className="h-4 w-4" />
         </Button>
