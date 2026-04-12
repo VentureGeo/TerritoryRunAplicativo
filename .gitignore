@@ -8,15 +8,9 @@ __v0_jsx-dev-runtime.ts
 next.user-config.*
 
 # Environment variables
-.env
-!.env.example
 .env*.local
 
 # Common ignores
 node_modules
 .next/
 .DS_Store
-
-# SQLite local
-/dev.db
-/dev.db-journal

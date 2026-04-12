@@ -7,10 +7,12 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Mail } from 'lucide-react'
 import { toast } from 'sonner'
 
+import { requestPasswordReset } from '@/lib/auth/auth-service'
 import {
   forgotPasswordSchema,
   type ForgotPasswordFormValues,
 } from '@/lib/auth/schemas'
+import { AuthError } from '@/lib/auth/types'
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -32,26 +34,14 @@ export function ForgotPasswordForm({ className }: { className?: string }) {
 
   async function onSubmit(data: ForgotPasswordFormValues) {
     try {
-      const res = await fetch('/api/auth/forgot-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      })
-      const payload = await res.json().catch(() => ({}))
-      if (!res.ok) {
-        toast.error(
-          typeof payload.error === 'string'
-            ? payload.error
-            : 'Não foi possível enviar. Tente novamente.',
-        )
-        return
-      }
-      toast.success(
-        payload.message ??
-          'Se existir uma conta, enviaremos instruções por e-mail.',
-      )
-    } catch {
-      toast.error('Não foi possível enviar. Tente novamente.')
+      await requestPasswordReset(data)
+      toast.success('Se existir uma conta, enviaremos instruções por e-mail.')
+    } catch (err) {
+      const message =
+        err instanceof AuthError
+          ? err.message
+          : 'Não foi possível enviar. Tente novamente.'
+      toast.error(message)
     }
   }
 
