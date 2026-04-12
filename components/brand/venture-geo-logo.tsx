@@ -1,6 +1,9 @@
 'use client'
 
+import Image from 'next/image'
 import { cn } from '@/lib/utils'
+import logosSemFundo from '@/IMG/logos-sem-fundo.png'
+import mascoteSemFundo from '@/IMG/mascote-sem-fundo.png'
 
 interface VentureGeoLogoProps {
   className?: string
@@ -186,5 +189,56 @@ export function TerritoryRunLogo({
         )}
       </div>
     </div>
+  )
+}
+
+export function VentureGeoBrandLogo({
+  className,
+  height = 32,
+  priority = false,
+}: {
+  className?: string
+  height?: number
+  priority?: boolean
+}) {
+  const w = Math.round(height * 3.2)
+  return (
+    <div
+      className={cn(
+        'inline-flex items-center justify-center rounded-lg bg-[#19305A] px-2 py-1',
+        className
+      )}
+    >
+      <Image
+        src={logosSemFundo}
+        alt="VentureGeo"
+        width={w}
+        height={height}
+        className="object-contain"
+        style={{ height, width: 'auto', maxWidth: 'min(100%, 168px)' }}
+        priority={priority}
+      />
+    </div>
+  )
+}
+
+export function VentureGeoMascot({
+  className,
+  height = 160,
+}: {
+  className?: string
+  height?: number
+}) {
+  const w = Math.round(height * 0.55)
+  return (
+    <Image
+      src={mascoteSemFundo}
+      alt=""
+      width={w}
+      height={height}
+      className={cn('object-contain', className)}
+      style={{ height, width: 'auto' }}
+      aria-hidden
+    />
   )
 }

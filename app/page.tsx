@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { VentureGeoBrandLogo, VentureGeoMascot } from '@/components/brand/venture-geo-logo'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Map, Trophy, Users, Zap, ArrowRight, MapPin } from 'lucide-react'
@@ -25,9 +26,7 @@ export default function HomePage() {
           {/* Nav */}
           <nav className="flex items-center justify-between mb-16">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-                <Map className="h-6 w-6 text-primary-foreground" />
-              </div>
+              <VentureGeoBrandLogo height={34} priority />
               <span className="text-xl font-bold text-foreground">TerritoryRun</span>
             </div>
             <div className="flex items-center gap-2">
@@ -46,32 +45,42 @@ export default function HomePage() {
           </nav>
 
           {/* Hero content */}
-          <div className="max-w-3xl mx-auto text-center py-16">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-8">
-              <Zap className="h-4 w-4" />
-              Gamificacao de Corrida e Caminhada
+          <div className="flex flex-col xl:flex-row xl:items-center xl:justify-center xl:gap-10 py-16">
+            <div className="max-w-3xl mx-auto text-center flex-1">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-8">
+                <Zap className="h-4 w-4" />
+                Gamificacao de Corrida e Caminhada
+              </div>
+
+              <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6 text-balance">
+                Conquiste seu{' '}
+                <span className="text-primary">Caminho</span>
+              </h1>
+
+              <p className="text-lg md:text-xl text-muted-foreground mb-10 text-pretty max-w-2xl mx-auto">
+                Transforme suas corridas e caminhadas em conquistas territoriais. 
+                Corra, desenhe seu territorio no mapa e compete com amigos pela maior area.
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link href="/mapa">
+                  <Button size="lg" className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90 text-lg px-8 h-14">
+                    <MapPin className="mr-2 h-5 w-5" />
+                    Explorar Mapa
+                  </Button>
+                </Link>
+                <Button size="lg" variant="outline" className="w-full sm:w-auto text-lg px-8 h-14">
+                  Como Funciona
+                </Button>
+              </div>
+
+              <div className="mt-10 hidden md:flex xl:hidden justify-center">
+                <VentureGeoMascot height={130} className="opacity-80" />
+              </div>
             </div>
 
-            <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6 text-balance">
-              Conquiste seu{' '}
-              <span className="text-primary">Caminho</span>
-            </h1>
-
-            <p className="text-lg md:text-xl text-muted-foreground mb-10 text-pretty max-w-2xl mx-auto">
-              Transforme suas corridas e caminhadas em conquistas territoriais. 
-              Corra, desenhe seu territorio no mapa e compete com amigos pela maior area.
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/mapa">
-                <Button size="lg" className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90 text-lg px-8 h-14">
-                  <MapPin className="mr-2 h-5 w-5" />
-                  Explorar Mapa
-                </Button>
-              </Link>
-              <Button size="lg" variant="outline" className="w-full sm:w-auto text-lg px-8 h-14">
-                Como Funciona
-              </Button>
+            <div className="hidden xl:flex shrink-0 justify-center pb-2">
+              <VentureGeoMascot height={210} className="opacity-[0.88]" />
             </div>
           </div>
         </div>

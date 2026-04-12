@@ -1,6 +1,6 @@
 import Link from 'next/link'
-import { Map } from 'lucide-react'
 
+import { VentureGeoBrandLogo, VentureGeoMascot } from '@/components/brand/venture-geo-logo'
 import { LoginForm } from '@/components/auth/login-form'
 import {
   Card,
@@ -26,11 +26,9 @@ export default function LoginPage() {
       <div className="relative w-full max-w-md">
         <Link
           href="/"
-          className="flex items-center justify-center gap-2 mb-8 text-foreground hover:text-primary transition-colors"
+          className="flex items-center justify-center gap-3 mb-8 text-foreground hover:text-primary transition-colors"
         >
-          <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-            <Map className="h-6 w-6 text-primary-foreground" />
-          </div>
+          <VentureGeoBrandLogo height={32} />
           <span className="text-xl font-bold">TerritoryRun</span>
         </Link>
 
@@ -59,6 +57,10 @@ export default function LoginPage() {
             Voltar ao início
           </Link>
         </p>
+      </div>
+
+      <div className="pointer-events-none absolute bottom-6 right-6 hidden sm:block opacity-35">
+        <VentureGeoMascot height={100} />
       </div>
     </div>
   )

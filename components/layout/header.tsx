@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useTerritoryStore } from '@/lib/store/territory-store'
 import { useAuthStore } from '@/lib/store/auth-store'
 import { Button } from '@/components/ui/button'
+import { VentureGeoBrandLogo } from '@/components/brand/venture-geo-logo'
 import { formatArea } from '@/lib/territory/geo'
 import { LogOut, Map, Settings, Trophy, User } from 'lucide-react'
 
@@ -21,9 +22,7 @@ export function Header() {
     <header className="h-14 bg-card border-b border-border px-4 flex items-center justify-between shrink-0">
       {/* Logo */}
       <div className="flex items-center gap-3">
-        <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-          <Map className="h-5 w-5 text-primary-foreground" />
-        </div>
+        <VentureGeoBrandLogo height={30} />
         <div>
           <h1 className="text-lg font-bold text-foreground leading-none">
             TerritoryRun
