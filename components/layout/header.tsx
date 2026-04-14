@@ -1,12 +1,14 @@
 'use client'
 
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useTerritoryStore } from '@/lib/store/territory-store'
 import { useAuthStore } from '@/lib/store/auth-store'
+import { signOutRemote } from '@/lib/auth/auth-service'
 import { Button } from '@/components/ui/button'
 import { VentureGeoBrandLogo } from '@/components/brand/venture-geo-logo'
 import { formatArea } from '@/lib/territory/geo'
-import { LogOut, Map, Settings, Trophy, User } from 'lucide-react'
+import { LogOut, Map, Settings, Trophy, User, Users, Medal } from 'lucide-react'
 
 export function Header() {
   const router = useRouter()
@@ -32,6 +34,33 @@ export function Header() {
           </p>
         </div>
       </div>
+
+      <nav className="hidden lg:flex items-center gap-1 text-sm">
+        <Button variant="ghost" size="sm" asChild>
+          <Link href="/mapa" className="gap-1.5">
+            <Map className="h-4 w-4" />
+            Mapa
+          </Link>
+        </Button>
+        <Button variant="ghost" size="sm" asChild>
+          <Link href="/competicao" className="gap-1.5">
+            <Medal className="h-4 w-4" />
+            Competição
+          </Link>
+        </Button>
+        <Button variant="ghost" size="sm" asChild>
+          <Link href="/amigos" className="gap-1.5">
+            <Users className="h-4 w-4" />
+            Amigos
+          </Link>
+        </Button>
+        <Button variant="ghost" size="sm" asChild>
+          <Link href="/trofeus" className="gap-1.5">
+            <Trophy className="h-4 w-4" />
+            Troféus
+          </Link>
+        </Button>
+      </nav>
 
       {/* Quick stats */}
       <div className="hidden md:flex items-center gap-6">
@@ -68,8 +97,10 @@ export function Header() {
           size="icon"
           className="h-9 w-9"
           onClick={() => {
-            logout()
-            router.replace('/')
+            void signOutRemote().finally(() => {
+              logout()
+              router.replace('/')
+            })
           }}
           aria-label="Sair"
         >

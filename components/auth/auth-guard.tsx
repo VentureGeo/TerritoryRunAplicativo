@@ -8,11 +8,13 @@ import {
   useAuthStore,
 } from '@/lib/store/auth-store'
 import { Spinner } from '@/components/ui/spinner'
+import { AuthReadyContext } from '@/components/auth/auth-provider'
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const isAuthenticated = useAuthStore(selectIsAuthenticated)
   const [hydrated, setHydrated] = React.useState(false)
+  const { firebaseAuthReady } = React.useContext(AuthReadyContext)
 
   React.useEffect(() => {
     const unsub = useAuthStore.persist.onFinishHydration(() =>
@@ -27,12 +29,12 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   }, [])
 
   React.useEffect(() => {
-    if (hydrated && !isAuthenticated) {
+    if (hydrated && firebaseAuthReady && !isAuthenticated) {
       router.replace('/login')
     }
-  }, [hydrated, isAuthenticated, router])
+  }, [hydrated, firebaseAuthReady, isAuthenticated, router])
 
-  if (!hydrated || !isAuthenticated) {
+  if (!hydrated || !firebaseAuthReady || !isAuthenticated) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-background">
         <Spinner className="size-8 text-primary" />

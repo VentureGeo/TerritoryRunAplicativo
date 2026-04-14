@@ -174,23 +174,35 @@ export function formatDuration(seconds: number): string {
   return `${secs}s`
 }
 
+const USER_COLOR_PALETTE = [
+  '#00BFFF', // Electric Blue
+  '#FF6B6B', // Coral
+  '#9B59B6', // Purple
+  '#E67E22', // Orange
+  '#1ABC9C', // Teal
+  '#F39C12', // Yellow
+  '#3498DB', // Blue
+  '#E74C3C', // Red
+  '#2ECC71', // Green
+  '#CCFF00', // Performance Lime
+] as const
+
 /**
  * Gera uma cor aleatoria para usuario
  */
 export function generateUserColor(): string {
-  const colors = [
-    '#00BFFF', // Electric Blue
-    '#FF6B6B', // Coral
-    '#9B59B6', // Purple
-    '#E67E22', // Orange
-    '#1ABC9C', // Teal
-    '#F39C12', // Yellow
-    '#3498DB', // Blue
-    '#E74C3C', // Red
-    '#2ECC71', // Green
-    '#9B59B6', // Violet
-  ]
-  return colors[Math.floor(Math.random() * colors.length)]
+  return USER_COLOR_PALETTE[
+    Math.floor(Math.random() * USER_COLOR_PALETTE.length)
+  ]!
+}
+
+/** Cor estável por identificador (ex.: uid Firebase). */
+export function generateStableUserColor(seed: string): string {
+  let h = 0
+  for (let i = 0; i < seed.length; i++) {
+    h = (h * 31 + seed.charCodeAt(i)) >>> 0
+  }
+  return USER_COLOR_PALETTE[h % USER_COLOR_PALETTE.length]!
 }
 
 /**
