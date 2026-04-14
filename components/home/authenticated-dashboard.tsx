@@ -31,9 +31,13 @@ export function AuthenticatedDashboard() {
     if (isFirebaseConfigured()) return
     if (territories.length === 0) initMockData()
   }, [territories.length, initMockData])
-  const myTerritories = useTerritoryStore((s) =>
-    s.territories.filter((t) => t.userId === currentUserId),
+  
+  // Memoize filtered territories to avoid infinite loop
+  const myTerritories = React.useMemo(
+    () => territories.filter((t) => t.userId === currentUserId),
+    [territories, currentUserId]
   )
+  
   const leaderboard = useLeaderboardPreview(6)
   const friendsCount = useFriendsCount()
 
