@@ -1,5 +1,6 @@
 'use client'
 
+import { memo, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { isFirebaseConfigured } from '@/lib/firebase/config'
@@ -17,36 +18,35 @@ import { cn } from '@/lib/utils'
 
 // This overlay is rendered OUTSIDE the MapContainer
 // It only handles drawing controls which don't need map access
-export function MapControlsOverlay() {
-  const {
-    mapMode,
-    setMapMode,
-    drawingPoints,
-    clearDrawing,
-    removeLastDrawingPoint,
-    finishDrawing,
-  } = useTerritoryStore()
+// Memoized for performance
+export const MapControlsOverlay = memo(function MapControlsOverlay() {
+  const mapMode = useTerritoryStore((s) => s.mapMode)
+  const setMapMode = useTerritoryStore((s) => s.setMapMode)
+  const drawingPoints = useTerritoryStore((s) => s.drawingPoints)
+  const clearDrawing = useTerritoryStore((s) => s.clearDrawing)
+  const removeLastDrawingPoint = useTerritoryStore((s) => s.removeLastDrawingPoint)
+  const finishDrawing = useTerritoryStore((s) => s.finishDrawing)
 
   const isDrawing = mapMode === 'draw'
   const canFinish = drawingPoints.length >= 3
   const canUndo = drawingPoints.length > 0
 
-  const handleStartDrawing = () => {
+  const handleStartDrawing = useCallback(() => {
     setMapMode('draw')
-  }
+  }, [setMapMode])
 
-  const handleCancelDrawing = () => {
+  const handleCancelDrawing = useCallback(() => {
     clearDrawing()
-  }
+  }, [clearDrawing])
 
-  const handleFinishDrawing = () => {
+  const handleFinishDrawing = useCallback(() => {
     const territory = finishDrawing()
     if (territory && isFirebaseConfigured()) {
       void saveTerritoryAndUpdateUserStats(territory)
         .then(() => toast.success('Território salvo na nuvem.'))
         .catch(() => toast.error('Não foi possível salvar o território.'))
     }
-  }
+  }, [finishDrawing])
 
   return (
     <>
@@ -171,4 +171,4 @@ export function MapControlsOverlay() {
       )}
     </>
   )
-}
+})
