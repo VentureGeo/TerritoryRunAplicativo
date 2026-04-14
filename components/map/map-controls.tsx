@@ -1,6 +1,9 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
+import { toast } from 'sonner'
+import { isFirebaseConfigured } from '@/lib/firebase/config'
+import { saveTerritoryAndUpdateUserStats } from '@/lib/firebase/territories'
 import { useTerritoryStore } from '@/lib/store/territory-store'
 import {
   Pencil,
@@ -37,7 +40,12 @@ export function MapControlsOverlay() {
   }
 
   const handleFinishDrawing = () => {
-    finishDrawing()
+    const territory = finishDrawing()
+    if (territory && isFirebaseConfigured()) {
+      void saveTerritoryAndUpdateUserStats(territory)
+        .then(() => toast.success('Território salvo na nuvem.'))
+        .catch(() => toast.error('Não foi possível salvar o território.'))
+    }
   }
 
   return (

@@ -1,6 +1,8 @@
 'use client'
 
 import { useEffect } from 'react'
+import { isFirebaseConfigured } from '@/lib/firebase/config'
+import { useFirestoreTerritorySync } from '@/hooks/use-firestore-territory-sync'
 import { useTerritoryStore } from '@/lib/store/territory-store'
 import { Header } from '@/components/layout/header'
 import { TerritorySidebar } from '@/components/territory/territory-sidebar'
@@ -10,8 +12,10 @@ export default function MapaPage() {
   const initMockData = useTerritoryStore((state) => state.initMockData)
   const territories = useTerritoryStore((state) => state.territories)
 
-  // Initialize mock data on mount
+  useFirestoreTerritorySync()
+
   useEffect(() => {
+    if (isFirebaseConfigured()) return
     if (territories.length === 0) {
       initMockData()
     }

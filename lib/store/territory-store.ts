@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { useAuthStore } from '@/lib/store/auth-store'
 import type { Position } from 'geojson'
 import type {
   Territory,
@@ -162,6 +163,7 @@ export const useTerritoryStore = create<TerritoryState>((set, get) => ({
     try {
       const calculation = calculateTerritoryFromPositions(drawingPoints)
       const currentUser = state.users.find((u) => u.id === currentUserId)
+      const authName = useAuthStore.getState().user?.displayName
 
       // Check for disputes with existing territories
       let status: TerritoryStatus = 'active'
@@ -182,13 +184,13 @@ export const useTerritoryStore = create<TerritoryState>((set, get) => ({
       const newTerritory: Territory = {
         id: generateId(),
         userId: currentUserId,
-        userName: currentUser?.displayName || 'Usuario Demo',
+        userName: currentUser?.displayName || authName || 'Corredor',
         userColor: currentUser?.color || '#B8FF00',
         polygon: calculation.polygon,
         areaM2: calculation.areaM2,
         createdAt: Date.now(),
         updatedAt: Date.now(),
-        protectedUntil: Date.now() + 2 * 60 * 60 * 1000, // 2 hours protection
+        protectedUntil: Date.now() + 3 * 60 * 60 * 1000, // 3h (regra produto MVP)
         status,
         dominanceLevel: 'bronze',
         conquestCount: 1,

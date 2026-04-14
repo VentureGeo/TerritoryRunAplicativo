@@ -6,9 +6,9 @@ import { TerritoryCard } from './territory-card'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { formatArea } from '@/lib/territory/geo'
+import { VentureGeoBrandLogo } from '@/components/brand/venture-geo-logo'
 import { cn } from '@/lib/utils'
 import {
-  Map,
   MapPin,
   Swords,
   User,
@@ -83,12 +83,7 @@ export function TerritorySidebar() {
           <ChevronRight className="h-4 w-4 text-muted-foreground" />
         </Button>
         <div className="flex flex-col items-center gap-4">
-          <div 
-            className="w-10 h-10 rounded-xl flex items-center justify-center"
-            style={{ background: 'rgba(204, 255, 0, 0.1)' }}
-          >
-            <MapPin className="h-5 w-5 text-[#CCFF00]" />
-          </div>
+          <VentureGeoBrandLogo height={38} className="px-1.5" />
           <div className="text-sm font-mono font-bold text-[#CCFF00]">
             {territories.length}
           </div>
@@ -108,9 +103,9 @@ export function TerritorySidebar() {
         style={{ borderColor: '#2d4a70' }}
       >
         <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Map className="h-5 w-5 text-[#CCFF00]" />
-            <h2 className="font-semibold text-foreground">Territorios</h2>
+          <div className="flex items-center gap-2 min-w-0">
+            <VentureGeoBrandLogo height={42} className="shrink-0" />
+            <h2 className="font-semibold text-foreground truncate">Territorios</h2>
           </div>
           <Button
             variant="ghost"

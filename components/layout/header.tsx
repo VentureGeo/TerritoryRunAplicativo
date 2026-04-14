@@ -1,11 +1,18 @@
 'use client'
 
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useTerritoryStore } from '@/lib/store/territory-store'
+import { useAuthStore } from '@/lib/store/auth-store'
+import { signOutRemote } from '@/lib/auth/auth-service'
 import { Button } from '@/components/ui/button'
+import { VentureGeoBrandLogo } from '@/components/brand/venture-geo-logo'
 import { formatArea } from '@/lib/territory/geo'
-import { Map, User, Settings, Trophy } from 'lucide-react'
+import { LogOut, Map, Settings, Trophy, User, Users, Medal } from 'lucide-react'
 
 export function Header() {
+  const router = useRouter()
+  const logout = useAuthStore((s) => s.logout)
   const { territories, currentUserId, getTotalAreaForUser, users } =
     useTerritoryStore()
 
@@ -17,9 +24,7 @@ export function Header() {
     <header className="h-14 bg-card border-b border-border px-4 flex items-center justify-between shrink-0">
       {/* Logo */}
       <div className="flex items-center gap-3">
-        <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-          <Map className="h-5 w-5 text-primary-foreground" />
-        </div>
+        <VentureGeoBrandLogo height={42} />
         <div>
           <h1 className="text-lg font-bold text-foreground leading-none">
             TerritoryRun
@@ -29,6 +34,33 @@ export function Header() {
           </p>
         </div>
       </div>
+
+      <nav className="hidden lg:flex items-center gap-1 text-sm">
+        <Button variant="ghost" size="sm" asChild>
+          <Link href="/mapa" className="gap-1.5">
+            <Map className="h-4 w-4" />
+            Mapa
+          </Link>
+        </Button>
+        <Button variant="ghost" size="sm" asChild>
+          <Link href="/competicao" className="gap-1.5">
+            <Medal className="h-4 w-4" />
+            Competição
+          </Link>
+        </Button>
+        <Button variant="ghost" size="sm" asChild>
+          <Link href="/amigos" className="gap-1.5">
+            <Users className="h-4 w-4" />
+            Amigos
+          </Link>
+        </Button>
+        <Button variant="ghost" size="sm" asChild>
+          <Link href="/trofeus" className="gap-1.5">
+            <Trophy className="h-4 w-4" />
+            Troféus
+          </Link>
+        </Button>
+      </nav>
 
       {/* Quick stats */}
       <div className="hidden md:flex items-center gap-6">
@@ -59,6 +91,21 @@ export function Header() {
 
       {/* User menu */}
       <div className="flex items-center gap-2">
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="h-9 w-9"
+          onClick={() => {
+            void signOutRemote().finally(() => {
+              logout()
+              router.replace('/')
+            })
+          }}
+          aria-label="Sair"
+        >
+          <LogOut className="h-4 w-4" />
+        </Button>
         <Button variant="ghost" size="icon" className="h-9 w-9">
           <Settings className="h-4 w-4" />
         </Button>
