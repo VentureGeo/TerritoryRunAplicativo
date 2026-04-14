@@ -28,6 +28,7 @@ npm run lint
 
 - [Visão web + Firebase](Docs/web-firebase.md)
 - [Modelo Firestore](Docs/modelo-dados-firestore.md)
+- [Cadastro de utilizador](Docs/cadastro-usuario.md)
 
 ## Rotas principais
 
@@ -35,6 +36,7 @@ npm run lint
 |------|-----------|
 | `/` | Landing (visitante) ou dashboard (autenticado) |
 | `/login` | Entrada |
+| `/cadastro` | Criar conta (Firebase) |
 | `/mapa` | Mapa e desenho de território |
 | `/competicao` | Ranking global e entre amigos |
 | `/amigos` | Pedidos e lista de amigos |

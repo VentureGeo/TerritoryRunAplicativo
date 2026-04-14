@@ -6,14 +6,33 @@ Documento ID = **UID** do Firebase Auth.
 
 | Campo | Tipo | Descrição |
 |-------|------|-----------|
-| `displayName` | string | Nome apresentado |
+| `displayName` | string | Nome apresentado (nome completo no cadastro) |
+| `nomeCompleto` | string? | Redundante com displayName quando vem do cadastro |
 | `email` | string | E-mail em minúsculas (lookup para amigos) |
+| `username` | string? | Slug único (minúsculas, `a-z0-9_`); ver coleção `usernames` |
+| `dataNascimento` | string? | Data ISO `YYYY-MM-DD` |
+| `sexo` | string? | `male` \| `female` \| `other` \| `prefer_not` |
+| `peso` | number? | Peso em kg |
+| `altura` | number? | Altura em cm |
 | `color` | string | Cor estável no mapa |
 | `totalAreaM2` | number | Área acumulada (soma ao criar território) |
 | `territoriesCount` | number | Contagem de territórios |
 | `xp` | number | XP acumulado (ganho por território) |
 | `createdAt` | timestamp | Criação do perfil |
 | `updatedAt` | timestamp | Última atualização |
+
+Contas antigas podem não ter os campos opcionais; o login social ou `ensureUserProfile` pode criar só o mínimo.
+
+## Coleção `usernames`
+
+Documento ID = **slug** normalizado (único).
+
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| `uid` | string | UID do Firebase Auth dono deste username |
+| `createdAt` | timestamp | Reserva do nome |
+
+Criado na transação de registo; impede duplicar o mesmo username.
 
 ## Coleção `territories`
 

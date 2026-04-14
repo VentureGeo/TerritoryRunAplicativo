@@ -31,7 +31,7 @@ export function MarketingLanding() {
                   Entrar
                 </Button>
               </Link>
-              <Link href="/login">
+              <Link href="/cadastro">
                 <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
                   Abrir conta
                   <ArrowRight className="h-4 w-4" />
@@ -58,7 +58,7 @@ export function MarketingLanding() {
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link href="/login">
+                <Link href="/cadastro">
                   <Button
                     size="lg"
                     className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90 text-lg px-8 h-14"
@@ -145,17 +145,24 @@ export function MarketingLanding() {
               Pronto para conquistar?
             </h2>
             <p className="text-muted-foreground text-lg mb-8 max-w-xl mx-auto">
-              Entre com sua conta e acesse o mapa, ranking e trofeus.
+              Crie sua conta ou entre para acessar o mapa, ranking e trofeus.
             </p>
-            <Link href="/login">
-              <Button
-                size="lg"
-                className="bg-primary text-primary-foreground hover:bg-primary/90 text-lg px-10 h-14"
-              >
-                <Map className="mr-2 h-5 w-5" />
-                Entrar
-              </Button>
-            </Link>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
+              <Link href="/cadastro">
+                <Button
+                  size="lg"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 text-lg px-10 h-14"
+                >
+                  <Map className="mr-2 h-5 w-5" />
+                  Criar conta
+                </Button>
+              </Link>
+              <Link href="/login">
+                <Button size="lg" variant="outline" className="text-lg px-10 h-14">
+                  Entrar
+                </Button>
+              </Link>
+            </div>
           </Card>
         </div>
       </section>

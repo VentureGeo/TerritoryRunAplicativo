@@ -7,6 +7,15 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // Índice único: doc ID = slug; corpo mínimo { uid, createdAt }
+    match /usernames/{slug} {
+      allow read: if true;
+      allow create: if request.auth != null
+        && request.resource.data.uid == request.auth.uid
+        && !exists(/databases/$(database)/documents/usernames/$(slug));
+      allow update, delete: if false;
+    }
+
     match /territories/{territoryId} {
       allow read: if true;
       allow create: if request.auth != null

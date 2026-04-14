@@ -5,7 +5,11 @@
 
 import type { AuthSession } from './types'
 import { AuthError } from './types'
-import type { ForgotPasswordFormValues, LoginFormValues } from './schemas'
+import type {
+  ForgotPasswordFormValues,
+  LoginFormValues,
+  SignupFormValues,
+} from './schemas'
 import { isFirebaseConfigured } from '@/lib/firebase/config'
 
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms))
@@ -82,6 +86,86 @@ export async function requestPasswordReset(
   await delay(500)
   if (data.email.toLowerCase().includes('fail@')) {
     throw new AuthError('Não foi possível enviar o e-mail. Tente novamente.')
+  }
+}
+
+/**
+ * Registo com Firebase Auth + Firestore (perfil + username único).
+ * Requer Firebase configurado.
+ */
+export async function registerWithFirebase(
+  values: SignupFormValues,
+): Promise<AuthSession> {
+  if (!isFirebaseConfigured()) {
+    throw new AuthError(
+      'Configure o Firebase (.env.local) para criar uma conta.',
+    )
+  }
+
+  const {
+    createUserWithEmailAndPassword,
+    updateProfile,
+    deleteUser,
+  } = await import('firebase/auth')
+  const { getFirebaseAuth } = await import('@/lib/firebase/client')
+  const { firebaseUserToSession } = await import('./firebase-session')
+  const { createUserProfileAfterSignup } = await import(
+    '@/lib/firebase/user-profile'
+  )
+
+  const auth = getFirebaseAuth()
+  const email = values.email.trim().toLowerCase()
+  const { confirmPassword: _, ...profile } = values
+
+  let created: import('firebase/auth').User | null = null
+
+  try {
+    const cred = await createUserWithEmailAndPassword(
+      auth,
+      email,
+      values.password,
+    )
+    created = cred.user
+    await updateProfile(cred.user, {
+      displayName: profile.nomeCompleto,
+    })
+    await createUserProfileAfterSignup(cred.user.uid, cred.user.email ?? email, {
+      nomeCompleto: profile.nomeCompleto,
+      usernameSlug: profile.username,
+      dataNascimento: profile.dataNascimento,
+      sexo: profile.sexo,
+      peso: profile.peso,
+      altura: profile.altura,
+    })
+    return firebaseUserToSession(cred.user)
+  } catch (e: unknown) {
+    if (created) {
+      try {
+        await deleteUser(created)
+      } catch {
+        /* ignore */
+      }
+    }
+    const code =
+      e && typeof e === 'object' && 'code' in e
+        ? String((e as { code: string }).code)
+        : ''
+    if (code === 'auth/email-already-in-use') {
+      throw new AuthError('Este e-mail já está registado.')
+    }
+    if (code === 'auth/weak-password') {
+      throw new AuthError('Senha fraca. Use pelo menos 6 caracteres.')
+    }
+    if (code === 'auth/invalid-email') {
+      throw new AuthError('E-mail inválido.')
+    }
+    const msg = e instanceof Error ? e.message : String(e)
+    if (msg === 'USERNAME_TAKEN' || msg.includes('USERNAME_TAKEN')) {
+      throw new AuthError(
+        'Este nome de usuário já está em uso. Escolha outro.',
+      )
+    }
+    throw new AuthError('Não foi possível criar a conta. Tente novamente.')
   }
 }
 
