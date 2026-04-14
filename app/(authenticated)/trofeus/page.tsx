@@ -22,11 +22,15 @@ const iconMap = {
 
 export default function TrofeusPage() {
   const currentUserId = useTerritoryStore((s) => s.currentUserId)
+  const territories = useTerritoryStore((s) => s.territories)
   const getTotalAreaForUser = useTerritoryStore((s) => s.getTotalAreaForUser)
-  const myTerritories = useTerritoryStore((s) =>
-    s.territories.filter((t) => t.userId === currentUserId),
-  )
   const friendsCount = useFriendsCount()
+  
+  // Memoize filtered territories to avoid infinite loop
+  const myTerritories = React.useMemo(
+    () => territories.filter((t) => t.userId === currentUserId),
+    [territories, currentUserId]
+  )
   const user = useAuthStore((s) => s.user)
   const [isLoading, setIsLoading] = React.useState(true)
 
