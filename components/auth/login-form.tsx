@@ -14,6 +14,7 @@ import {
   selectIsAuthenticated,
   useAuthStore,
 } from '@/lib/store/auth-store'
+import { useRateLimit } from '@/hooks/use-rate-limit'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import {
@@ -33,6 +34,13 @@ export function LoginForm({ className }: { className?: string }) {
   const setSession = useAuthStore((s) => s.setSession)
   const isAuthenticated = useAuthStore(selectIsAuthenticated)
   const [showPassword, setShowPassword] = React.useState(false)
+  
+  // Rate limiting: max 5 tentativas por minuto, intervalo minimo de 1s
+  const { canExecute, recordExecution, isLimited } = useRateLimit({
+    minInterval: 1000,
+    maxAttempts: 5,
+    windowMs: 60000,
+  })
 
   React.useEffect(() => {
     if (isAuthenticated) {
@@ -47,6 +55,14 @@ export function LoginForm({ className }: { className?: string }) {
 
   async function onSubmit(data: LoginFormValues) {
     form.clearErrors('root')
+    
+    if (!canExecute()) {
+      form.setError('root', { message: 'Muitas tentativas. Aguarde um momento.' })
+      return
+    }
+    
+    recordExecution()
+    
     try {
       const session = await login(data)
       setSession(session)
@@ -145,13 +161,15 @@ export function LoginForm({ className }: { className?: string }) {
         <Button
           type="submit"
           className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
-          disabled={submitting}
+          disabled={submitting || isLimited}
         >
           {submitting ? (
             <>
               <Spinner className="size-4" />
               Entrando...
             </>
+          ) : isLimited ? (
+            <>Aguarde...</>
           ) : (
             <>
               <Map className="size-4" />

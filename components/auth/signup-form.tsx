@@ -15,6 +15,7 @@ import {
   useAuthStore,
 } from '@/lib/store/auth-store'
 import { isFirebaseConfigured } from '@/lib/firebase/config'
+import { useRateLimit } from '@/hooks/use-rate-limit'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { FloatingInput } from '@/components/ui/floating-input'
@@ -47,6 +48,13 @@ export function SignupForm({ className }: { className?: string }) {
   const router = useRouter()
   const setSession = useAuthStore((s) => s.setSession)
   const isAuthenticated = useAuthStore(selectIsAuthenticated)
+  
+  // Rate limiting: max 3 tentativas por minuto, intervalo minimo de 2s
+  const { canExecute, recordExecution, isLimited, attemptsRemaining } = useRateLimit({
+    minInterval: 2000,
+    maxAttempts: 3,
+    windowMs: 60000,
+  })
 
   React.useEffect(() => {
     if (isAuthenticated) {
@@ -71,6 +79,17 @@ export function SignupForm({ className }: { className?: string }) {
 
   async function onSubmit(data: SignupFormValues) {
     form.clearErrors('root')
+    
+    // Verifica rate limit antes de submeter
+    if (!canExecute()) {
+      const message = `Muitas tentativas. Aguarde um momento antes de tentar novamente. (${attemptsRemaining} tentativas restantes)`
+      form.setError('root', { message })
+      toast.error(message)
+      return
+    }
+    
+    recordExecution()
+    
     try {
       const session = await registerWithFirebase(data)
       setSession(session)
@@ -346,13 +365,15 @@ export function SignupForm({ className }: { className?: string }) {
         <Button
           type="submit"
           className="mt-2 w-full h-12 text-base font-semibold"
-          disabled={submitting}
+          disabled={submitting || isLimited}
         >
           {submitting ? (
             <>
               <Spinner className="size-4" />
               Criando conta...
             </>
+          ) : isLimited ? (
+            <>Aguarde um momento...</>
           ) : (
             <>
               <UserPlus className="size-4" />

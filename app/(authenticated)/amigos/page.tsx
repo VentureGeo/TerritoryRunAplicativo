@@ -19,7 +19,9 @@ import { AuthenticatedShell } from '@/components/layout/authenticated-shell'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { FriendsListSkeleton } from '@/components/ui/skeletons'
 import { formatArea } from '@/lib/territory/geo'
+import { useRateLimit } from '@/hooks/use-rate-limit'
 import { User } from 'lucide-react'
 
 export default function AmigosPage() {
@@ -35,6 +37,14 @@ export default function AmigosPage() {
   const [friendProfiles, setFriendProfiles] = React.useState<
     { id: string; displayName: string; totalAreaM2: number }[]
   >([])
+  const [isLoadingFriends, setIsLoadingFriends] = React.useState(true)
+  
+  // Rate limit para envio de pedidos: max 3 por minuto
+  const { canExecute, recordExecution, isLimited } = useRateLimit({
+    minInterval: 2000,
+    maxAttempts: 3,
+    windowMs: 60000,
+  })
 
   React.useEffect(() => {
     if (!uid || !isFirebaseConfigured()) return
@@ -54,8 +64,10 @@ export default function AmigosPage() {
   React.useEffect(() => {
     if (!isFirebaseConfigured() || friendIds.length === 0) {
       setFriendProfiles([])
+      setIsLoadingFriends(false)
       return
     }
+    setIsLoadingFriends(true)
     let cancelled = false
     void (async () => {
       const rows: { id: string; displayName: string; totalAreaM2: number }[] = []
@@ -68,7 +80,10 @@ export default function AmigosPage() {
             totalAreaM2: p.totalAreaM2,
           })
       }
-      if (!cancelled) setFriendProfiles(rows)
+      if (!cancelled) {
+        setFriendProfiles(rows)
+        setIsLoadingFriends(false)
+      }
     })()
     return () => {
       cancelled = true
@@ -78,6 +93,14 @@ export default function AmigosPage() {
   async function handleSendRequest(e: React.FormEvent) {
     e.preventDefault()
     if (!uid || !email.trim()) return
+    
+    if (!canExecute()) {
+      toast.error('Muitos pedidos enviados. Aguarde um momento.')
+      return
+    }
+    
+    recordExecution()
+    
     try {
       const target = await findUserIdByEmail(email.trim())
       if (!target) {
@@ -151,7 +174,9 @@ export default function AmigosPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                   />
-                  <Button type="submit">Enviar pedido</Button>
+                  <Button type="submit" disabled={isLimited}>
+                    {isLimited ? 'Aguarde...' : 'Enviar pedido'}
+                  </Button>
                 </form>
               </CardContent>
             </Card>
@@ -216,7 +241,9 @@ export default function AmigosPage() {
                 <CardDescription>Área total registrada no perfil (Firestore).</CardDescription>
               </CardHeader>
               <CardContent>
-                {friendProfiles.length === 0 ? (
+                {isLoadingFriends ? (
+                  <FriendsListSkeleton count={3} />
+                ) : friendProfiles.length === 0 ? (
                   <p className="text-sm text-muted-foreground">Nenhum amigo ainda.</p>
                 ) : (
                   <ul className="space-y-2">
