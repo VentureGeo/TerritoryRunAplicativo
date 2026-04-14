@@ -8,6 +8,7 @@ import { useGlobalLeaderboard } from '@/hooks/use-global-leaderboard'
 import { AuthenticatedShell } from '@/components/layout/authenticated-shell'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { RankingListSkeleton } from '@/components/ui/skeletons'
 import { formatArea } from '@/lib/territory/geo'
 import type { RankingEntry } from '@/lib/territory/types'
 
@@ -15,6 +16,13 @@ export default function CompeticaoPage() {
   const uid = useAuthStore((s) => s.user?.id)
   const global = useGlobalLeaderboard(50)
   const [friendIds, setFriendIds] = React.useState<string[]>([])
+  const [isLoading, setIsLoading] = React.useState(true)
+
+  React.useEffect(() => {
+    // Simula carregamento inicial para mostrar skeleton
+    const timer = setTimeout(() => setIsLoading(false), 500)
+    return () => clearTimeout(timer)
+  }, [])
 
   React.useEffect(() => {
     if (!uid || !isFirebaseConfigured()) {
@@ -52,7 +60,7 @@ export default function CompeticaoPage() {
             <TabsTrigger value="friends">Amigos</TabsTrigger>
           </TabsList>
           <TabsContent value="global">
-            <LeaderboardCard entries={global} currentUserId={uid ?? ''} />
+            <LeaderboardCard entries={global} currentUserId={uid ?? ''} isLoading={isLoading} />
           </TabsContent>
           <TabsContent value="friends">
             {!isFirebaseConfigured() && (
@@ -60,12 +68,12 @@ export default function CompeticaoPage() {
                 Modo demo: todos os perfis do mapa entram no círculo de comparação.
               </p>
             )}
-            {isFirebaseConfigured() && friendIds.length === 0 && (
+            {isFirebaseConfigured() && friendIds.length === 0 && !isLoading && (
               <p className="text-xs text-muted-foreground mb-2">
                 Adicione amigos em Amigos para ver o ranking do seu círculo.
               </p>
             )}
-            <LeaderboardCard entries={friendsTabData} currentUserId={uid ?? ''} />
+            <LeaderboardCard entries={friendsTabData} currentUserId={uid ?? ''} isLoading={isLoading} />
           </TabsContent>
         </Tabs>
       </div>
@@ -73,12 +81,14 @@ export default function CompeticaoPage() {
   )
 }
 
-function LeaderboardCard({
+const LeaderboardCard = React.memo(function LeaderboardCard({
   entries,
   currentUserId,
+  isLoading = false,
 }: {
   entries: RankingEntry[]
   currentUserId: string
+  isLoading?: boolean
 }) {
   return (
     <Card>
@@ -87,7 +97,9 @@ function LeaderboardCard({
         <CardDescription>Quanto maior a área acumulada, melhor a posição.</CardDescription>
       </CardHeader>
       <CardContent>
-        {entries.length === 0 ? (
+        {isLoading ? (
+          <RankingListSkeleton count={5} />
+        ) : entries.length === 0 ? (
           <p className="text-sm text-muted-foreground py-8 text-center">
             Sem dados ainda.
           </p>
@@ -122,4 +134,4 @@ function LeaderboardCard({
       </CardContent>
     </Card>
   )
-}
+})

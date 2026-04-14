@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useCallback, useState, useId } from 'react'
+import { useEffect, useRef, useCallback, useState, useId, useMemo, memo } from 'react'
 import {
   MapContainer,
   TileLayer,
@@ -108,8 +108,8 @@ function LocationControl() {
   )
 }
 
-// Territory polygon component
-function TerritoryPolygon({
+// Territory polygon component - Memoized for performance
+const TerritoryPolygon = memo(function TerritoryPolygon({
   territory,
   isOwn,
   isSelected,
@@ -237,10 +237,10 @@ function TerritoryPolygon({
       </Popup>
     </Polygon>
   )
-}
+})
 
-// Drawing layer component
-function DrawingLayer() {
+// Drawing layer component - Memoized for performance
+const DrawingLayer = memo(function DrawingLayer() {
   const { drawingPoints, isDrawing } = useTerritoryStore()
 
   if (!isDrawing || drawingPoints.length === 0) return null
@@ -306,28 +306,35 @@ function DrawingLayer() {
       )}
     </>
   )
-}
+})
 
 export function TerritoryMap() {
   const mapId = useId()
   const mapRef = useRef<LeafletMap | null>(null)
   const [isMapReady, setIsMapReady] = useState(false)
   
-  const {
-    territories,
-    currentUserId,
-    selectedTerritoryId,
-    selectTerritory,
-    mapCenter,
-    mapZoom,
-  } = useTerritoryStore()
+  const territories = useTerritoryStore((s) => s.territories)
+  const currentUserId = useTerritoryStore((s) => s.currentUserId)
+  const selectedTerritoryId = useTerritoryStore((s) => s.selectedTerritoryId)
+  const selectTerritory = useTerritoryStore((s) => s.selectTerritory)
+  const mapCenter = useTerritoryStore((s) => s.mapCenter)
+  const mapZoom = useTerritoryStore((s) => s.mapZoom)
 
+  // Memoize the click handler to prevent unnecessary re-renders
   const handleTerritoryClick = useCallback(
     (id: string) => {
       selectTerritory(selectedTerritoryId === id ? null : id)
     },
     [selectTerritory, selectedTerritoryId]
   )
+
+  // Memoize territory callbacks to prevent re-creating functions on each render
+  const territoryClickHandlers = useMemo(() => {
+    return territories.reduce((acc, territory) => {
+      acc[territory.id] = () => handleTerritoryClick(territory.id)
+      return acc
+    }, {} as Record<string, () => void>)
+  }, [territories, handleTerritoryClick])
 
   // Cleanup map on unmount to prevent reuse issues
   useEffect(() => {
@@ -361,14 +368,14 @@ export function TerritoryMap() {
       <MapViewSync />
       <LocationControl />
 
-      {/* Render territories */}
+      {/* Render territories - using memoized click handlers */}
       {territories.map((territory) => (
         <TerritoryPolygon
           key={territory.id}
           territory={territory}
           isOwn={territory.userId === currentUserId}
           isSelected={selectedTerritoryId === territory.id}
-          onClick={() => handleTerritoryClick(territory.id)}
+          onClick={territoryClickHandlers[territory.id]}
         />
       ))}
 

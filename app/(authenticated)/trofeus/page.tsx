@@ -1,5 +1,6 @@
 'use client'
 
+import * as React from 'react'
 import { isFirebaseConfigured } from '@/lib/firebase/config'
 import { useAuthStore } from '@/lib/store/auth-store'
 import { useTerritoryStore } from '@/lib/store/territory-store'
@@ -8,6 +9,7 @@ import { computeTrophyProgress } from '@/lib/gamification/trophies'
 import { AuthenticatedShell } from '@/components/layout/authenticated-shell'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
+import { TrophiesListSkeleton } from '@/components/ui/skeletons'
 import { Flame, Map, Star, Trophy, Users } from 'lucide-react'
 
 const iconMap = {
@@ -26,6 +28,12 @@ export default function TrofeusPage() {
   )
   const friendsCount = useFriendsCount()
   const user = useAuthStore((s) => s.user)
+  const [isLoading, setIsLoading] = React.useState(true)
+
+  React.useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 400)
+    return () => clearTimeout(timer)
+  }, [])
 
   const totalArea = getTotalAreaForUser(currentUserId)
   const fc = isFirebaseConfigured() ? friendsCount : 0
@@ -54,49 +62,53 @@ export default function TrofeusPage() {
           </p>
         </div>
 
-        <div className="grid gap-4">
-          {trophies.map((t) => {
-            const Icon = iconMap[t.definition.icon]
-            return (
-              <Card
-                key={t.definition.id}
-                className={t.unlocked ? 'border-primary/40' : 'opacity-90'}
-              >
-                <CardHeader className="flex flex-row items-start gap-3 space-y-0">
-                  <div
-                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${
-                      t.unlocked ? 'bg-primary/15 text-primary' : 'bg-muted text-muted-foreground'
-                    }`}
-                  >
-                    <Icon className="h-5 w-5" />
-                  </div>
-                  <div className="space-y-1 min-w-0">
-                    <CardTitle className="text-base leading-tight">
-                      {t.definition.title}
-                    </CardTitle>
-                    <CardDescription>{t.definition.description}</CardDescription>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  {!t.unlocked && t.target > 1 && (
-                    <div className="space-y-1">
-                      <Progress
-                        value={Math.min(100, (t.progress / t.target) * 100)}
-                        className="h-2"
-                      />
-                      <p className="text-xs text-muted-foreground">
-                        {Math.round(t.progress)} / {t.target}
-                      </p>
+        {isLoading ? (
+          <TrophiesListSkeleton count={5} />
+        ) : (
+          <div className="grid gap-4">
+            {trophies.map((t) => {
+              const Icon = iconMap[t.definition.icon]
+              return (
+                <Card
+                  key={t.definition.id}
+                  className={t.unlocked ? 'border-primary/40' : 'opacity-90'}
+                >
+                  <CardHeader className="flex flex-row items-start gap-3 space-y-0">
+                    <div
+                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${
+                        t.unlocked ? 'bg-primary/15 text-primary' : 'bg-muted text-muted-foreground'
+                      }`}
+                    >
+                      <Icon className="h-5 w-5" />
                     </div>
-                  )}
-                  {t.unlocked && (
-                    <p className="text-xs font-medium text-primary">Desbloqueado</p>
-                  )}
-                </CardContent>
-              </Card>
-            )
-          })}
-        </div>
+                    <div className="space-y-1 min-w-0">
+                      <CardTitle className="text-base leading-tight">
+                        {t.definition.title}
+                      </CardTitle>
+                      <CardDescription>{t.definition.description}</CardDescription>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    {!t.unlocked && t.target > 1 && (
+                      <div className="space-y-1">
+                        <Progress
+                          value={Math.min(100, (t.progress / t.target) * 100)}
+                          className="h-2"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          {Math.round(t.progress)} / {t.target}
+                        </p>
+                      </div>
+                    )}
+                    {t.unlocked && (
+                      <p className="text-xs font-medium text-primary">Desbloqueado</p>
+                    )}
+                  </CardContent>
+                </Card>
+              )
+            })}
+          </div>
+        )}
       </div>
     </AuthenticatedShell>
   )
